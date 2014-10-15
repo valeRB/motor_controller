@@ -66,7 +66,7 @@ public:
         n.getParam("linVel",twist_linVel_x);
         n.getParam("angVel",twist_angVel_x);
         double base=0.21;
-        double r=0.1;
+        double r=0.05;
         //ROS_INFO("I heard: [%f]", twist_msg->angular.x);
 
         desiredAngVelRight = (twist_linVel_x+(base/2)*twist_angVel_x)/r;
@@ -138,23 +138,24 @@ public:
                 
         // Controller for left wheel
         double errorLeft = (desiredAngVelLeft - actualAngVelLeft);
+        ROS_INFO("errorLeft: [%f]",errorLeft);
         ItermL = ItermL + KIL*errorLeft*dT;
         DtermL = (errorLeft - previousErrorLeft)/dT;
         pwm1 = pwm1 + KPL*errorLeft + ItermL + KDL*DtermL;
-        if (pwm1 > 255)
-            pwm1 = 255;
+        if (pwm1 > 150)
+            pwm1 = 150;
 
         // Controller for left wheel
         double errorRight = (desiredAngVelRight - actualAngVelRight);
+        ROS_INFO("errorRight: [%f]",errorRight);
         ItermR = ItermR + KIR*errorRight*dT;
         DtermR = (errorRight - previousErrorRight)/dT;   
         pwm2 = pwm2 + KPR*errorRight + ItermR + KDR*DtermR;
-        if (pwm2 > 255)
-            pwm2 =255;
+        if (pwm2 > 150)
+            pwm2 = 150;
 
         int pwmOut1 = (int)pwm1;
         int pwmOut2 = (int)pwm2;
-        ROS_INFO("KPR: [%f]",KPR);
         //ROS_INFO("PWM2:[%d]",pwmOut2);
 
         pwm_msg.PWM1 = pwmOut1;

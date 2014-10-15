@@ -1,7 +1,7 @@
 <launch>
   
   <!-- Run Motor Controller  -->
-   <node pkg="motor_controller" type="motor_controller" name="PID_controller">
+   <node pkg="motor_controller" type="motor_controller" name="PID_controller" output="screen" >
    	<!-- KP, KI, KD individually  -->
     <param name="KPR" value="5"/>
     <param name="KPL" value="5"/>
