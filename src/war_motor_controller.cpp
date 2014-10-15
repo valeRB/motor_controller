@@ -123,8 +123,7 @@ public:
     */
 
     // ----- CHECK PWM VALUES TO BE TO CORRECT MOTOR ---------------
-    // PWM1 - Right Wheel
-    // PWM2 - Left Wheel
+
     void controllerVelocities()
     {   
         // This controller uses the Ziegler-Nichols method
@@ -142,10 +141,10 @@ public:
         ItermL = ItermL + KIL*errorLeft*dT;
         DtermL = (errorLeft - previousErrorLeft)/dT;
         pwm2 = pwm2 + KPL*errorLeft + ItermL + KDL*DtermL;
-        if (pwm2 > 200)
-            pwm2 = 200;
-        else if(pwm2 < -200)
-            pwm2 =-200;
+        if (pwm2 > 150)
+            pwm2 = 150;
+        else if(pwm2 < -150)
+            pwm2 =-150;
 
         // Controller for right wheel
         double errorRight = (desiredAngVelRight - actualAngVelRight);
@@ -153,10 +152,10 @@ public:
         ItermR = ItermR + KIR*errorRight*dT;
         DtermR = (errorRight - previousErrorRight)/dT;   
         pwm1 = pwm1 + KPR*errorRight + ItermR + KDR*DtermR;
-        if (pwm1 > 200)
-            pwm1 = 200;
-        else if(pwm1 < -200)
-            pwm1 =-200;
+        if (pwm1 > 150)
+            pwm1 = 150;
+        else if(pwm1 < -150)
+            pwm1 =-150;
 
         int pwmOut1 = (int)pwm1;
         int pwmOut2 = (int)pwm2;
@@ -188,10 +187,10 @@ int main(int argc, char **argv)
 
     //----COMMENT OUT ONE FUNCTION TO GET PARAMETERS -----
     // GET KP,KI,KD from launch file
-    controller.GetTuningParameters();
+    //controller.GetTuningParameters();
 
     //GET Ku,Tu to calculate KP,KI,KD (Ziegler-Nihcols)
-    //controller.GetZieglerNichlosParam();
+    controller.GetZieglerNichlosParam();
     // ---------------------------------------------------
 
     // This calls a linear velocity and angular velocity from launch file
