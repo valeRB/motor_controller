@@ -101,7 +101,7 @@ public:
         double delta_enc2=enc_msg->delta_encoder2;
         double sampleTime=0.1;
         //ROS_INFO("I heard: [%d]", enc_msg->encoder1);
-        actualAngVelRight=(delta_enc2*(M_PI/180))/sampleTime;
+        actualAngVelRight=((delta_enc2*-1)*(M_PI/180))/sampleTime;
         actualAngVelLeft=(delta_enc1*(M_PI/180))/sampleTime;
         ROS_INFO("Actual wR: [%f]",actualAngVelRight);
         ROS_INFO("Actual wL: [%f]",actualAngVelLeft);
