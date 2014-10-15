@@ -187,10 +187,10 @@ int main(int argc, char **argv)
 
     //----COMMENT OUT ONE FUNCTION TO GET PARAMETERS -----
     // GET KP,KI,KD from launch file
-    //controller.GetTuningParameters();
+    controller.GetTuningParameters();
 
     //GET Ku,Tu to calculate KP,KI,KD (Ziegler-Nihcols)
-    controller.GetZieglerNichlosParam();
+    //controller.GetZieglerNichlosParam();
     // ---------------------------------------------------
 
     // This calls a linear velocity and angular velocity from launch file
