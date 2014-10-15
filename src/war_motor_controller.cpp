@@ -17,10 +17,15 @@ public:
     double pwm1, pwm2;
     double previousErrorLeft, previousErrorRight;
     double ItermL, ItermR, DtermL, DtermR;
+    double KPR, KPL, KIL, KIR, KDL, KDR;
+    double KUL, KUR, TUR, TUL;
+    // Eliminate this when twist messages are ready;
+    double twist_linVel_x, twist_angVel_x;
     
     MotorController()
     {
         n = ros::NodeHandle("~");
+
         motor_cotroller_ = NULL;
     }
 
@@ -28,14 +33,53 @@ public:
     {
         delete motor_cotroller_;
     }
+
+    void GetTuningParameters()
+    {
+        n.getParam("KPR",KPR);
+        n.getParam("KPL",KPL);
+        n.getParam("KIL",KIL);
+        n.getParam("KIR",KIR);
+        n.getParam("KDR",KDR);
+        n.getParam("KDL",KDL);
+    }
+
+    void GetZieglerNichlosParam()
+    {
+        n.getParam("KUR",KUR);
+        n.getParam("KUR",KUL);
+        n.getParam("KUR",TUR);
+        n.getParam("KUR",TUL);
+
+        KPR = 0.6*KUR;
+        KPL = 0.6*KUL;
+        KIL = 2*KPL/TUL;
+        KIR = 2*KPR/TUR;
+        KDL = KPL*TUL/8;
+        KDR = KPR*TUR/8;
+        
+
+    }
+
+    void GetVelocities()
+    {
+        n.getParam("linVel",twist_linVel_x);
+        n.getParam("angVel",twist_angVel_x);
+        double base=0.21;
+        double r=0.1;
+        //ROS_INFO("I heard: [%f]", twist_msg->angular.x);
+
+        desiredAngVelRight = (twist_linVel_x+(base/2)*twist_angVel_x)/r;
+        desiredAngVelLeft = (twist_linVel_x-(base/2)*twist_angVel_x)/r;
+    }
     
 
     void init()
     {
         motor_cotroller_ = new MotorController();
-        encoder_subscriber = n.subscribe("/kobuki/encoders", 1, &MotorController::encoderCallback,this);
-        twist_subscriber = n.subscribe("/motor_controller/twist",1, &MotorController::twistCallback,this);
-        pub = n.advertise<ras_arduino_msgs::PWM>("/kobuki/pwm", 1);
+        encoder_subscriber = n.subscribe("/arduino/encoders", 1, &MotorController::encoderCallback,this);
+        //twist_subscriber = n.subscribe("/motor_controller/twist",1, &MotorController::twistCallback,this);
+        pub = n.advertise<ras_arduino_msgs::PWM>("/arduino/pwm", 1);
 
         //P=3;
         /*
@@ -48,7 +92,7 @@ public:
         */
     }
     
-
+    // -------- CHECK WHICH MOTOR IS WHICH --------------------
     void encoderCallback(const ras_arduino_msgs::Encoders::ConstPtr &enc_msg)
     {
         double enc1=enc_msg->encoder1;
@@ -63,7 +107,7 @@ public:
         //ROS_INFO("Actual wL: [%f]",actualAngVelLeft);
     }
 
-
+/*
     void twistCallback(const geometry_msgs::Twist::ConstPtr &twist_msg)
     {
         double twist_linVel_x=twist_msg->linear.x;
@@ -76,19 +120,18 @@ public:
         desiredAngVelLeft = (twist_linVel_x-(base/2)*twist_angVel_x)/r;
         //ROS_INFO("wRight: [%f]\n wLeft: [%f]",desiredAngVelRight,desiredAngVelLeft);
     }
+    */
+
+    // ----- CHECK PWM VALUES TO BE TO CORRECT MOTOR ---------------
+    // PWM1 - Right Wheel
+    // PWM2 - Left Wheel
     void controllerVelocities()
     {   
         // This controller uses the Ziegler-Nichols method
         // to tune the KP,KI,KD
-        double Ku = 4;
-        double Tu = 1;
-        double KPR = 0.6*Ku;
-        double KPL = KPR;
-        double KIL = 2*KPL/Tu;
-        double KIR = KIL;
-        double KDL = KPL*Tu/8;
-        double KDR = KDL;
+
         double dT=0.1;
+        
         ras_arduino_msgs::PWM pwm_msg;
         //ROS_INFO("desiredAngVelRight: [%f]",desiredAngVelRight);
         //ROS_INFO("actualAngVelRight:[%f]",actualAngVelRight);
@@ -111,7 +154,7 @@ public:
 
         int pwmOut1 = (int)pwm1;
         int pwmOut2 = (int)pwm2;
-        //ROS_INFO("PWM1: [%d]",pwmOut1);
+        ROS_INFO("KPR: [%f]",KPR);
         //ROS_INFO("PWM2:[%d]",pwmOut2);
 
         pwm_msg.PWM1 = pwmOut1;
@@ -137,7 +180,18 @@ int main(int argc, char **argv)
     MotorController controller;
     
     controller.init();
-    
+
+    //----COMMENT OUT ONE FUNCTION TO GET PARAMETERS -----
+    // GET KP,KI,KD from launch file
+    controller.GetTuningParameters();
+
+    //GET Ku,Tu to calculate KP,KI,KD (Ziegler-Nihcols)
+    //controller.GetZieglerNichlosParam();
+    // ---------------------------------------------------
+
+    // This calls a linear velocity and angular velocity from launch file
+    controller.GetVelocities();
+
     ros::Rate loop_rate(10);
 
     

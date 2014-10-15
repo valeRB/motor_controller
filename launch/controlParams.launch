@@ -1,0 +1,23 @@
+<launch>
+  
+  <!-- Run Motor Controller  -->
+   <node pkg="motor_controller" type="motor_controller" name="PID_controller">
+   	<!-- KP, KI, KD individually  -->
+    <param name="KPR" value="5"/>
+    <param name="KPL" value="5"/>
+    <param name="KIR" value="0"/>
+    <param name="KIL" value="0"/>
+    <param name="KDR" value="0"/>
+    <param name="KDL" value="0"/>
+   	<!-- Ziegler-Nichols parameters  -->
+    <param name="KUR" value="5"/>
+    <param name="KUL" value="5"/>
+    <param name="TUR" value="2"/>
+    <param name="TUL" value="2"/>
+	<!-- Angular and Linear Velocities  -->
+    <param name="linVel" value="0.01"/>
+    <param name="angVel" value="0"/>
+  </node>
+
+
+</launch>

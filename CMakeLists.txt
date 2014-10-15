@@ -18,5 +18,5 @@ catkin_package(
 ## Build talker and listener
 include_directories(include ${catkin_INCLUDE_DIRS})
 
-# add_executable(motor_controller src/war_motor_controller.cpp)
-# target_link_libraries(war_motor_controller ${catkin_LIBRARIES})
+add_executable(motor_controller src/war_motor_controller.cpp)
+target_link_libraries(motor_controller ${catkin_LIBRARIES})
