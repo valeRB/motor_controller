@@ -141,18 +141,22 @@ public:
         ROS_INFO("errorLeft: [%f]",errorLeft);
         ItermL = ItermL + KIL*errorLeft*dT;
         DtermL = (errorLeft - previousErrorLeft)/dT;
-        pwm1 = pwm1 + KPL*errorLeft + ItermL + KDL*DtermL;
-        if (pwm1 > 150)
-            pwm1 = 150;
+        pwm2 = pwm2 + KPL*errorLeft + ItermL + KDL*DtermL;
+        if (pwm2 > 150)
+            pwm2 = 150;
+        else if(pwm2 < -150)
+            pwm2 =-150;
 
-        // Controller for left wheel
+        // Controller for right wheel
         double errorRight = (desiredAngVelRight - actualAngVelRight);
         ROS_INFO("errorRight: [%f]",errorRight);
         ItermR = ItermR + KIR*errorRight*dT;
         DtermR = (errorRight - previousErrorRight)/dT;   
-        pwm2 = pwm2 + KPR*errorRight + ItermR + KDR*DtermR;
-        if (pwm2 > 150)
-            pwm2 = 150;
+        pwm1 = pwm1 + KPR*errorRight + ItermR + KDR*DtermR;
+        if (pwm1 > 150)
+            pwm1 = 150;
+        else if(pwm1 < -150)
+            pwm1 =-150;
 
         int pwmOut1 = (int)pwm1;
         int pwmOut2 = (int)pwm2;
