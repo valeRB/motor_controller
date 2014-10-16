@@ -71,25 +71,16 @@ public:
 
         desiredAngVelRight = (twist_linVel_x+(base/2)*twist_angVel_x)/r;
         desiredAngVelLeft = (twist_linVel_x-(base/2)*twist_angVel_x)/r;
-    }
+    } 
     
 
     void init()
     {
         motor_cotroller_ = new MotorController();
         encoder_subscriber = n.subscribe("/arduino/encoders", 1, &MotorController::encoderCallback,this);
-        //twist_subscriber = n.subscribe("/motor_controller/twist",1, &MotorController::twistCallback,this);
+        twist_subscriber = n.subscribe("/motor_controller/twist",1, &MotorController::twistCallback,this);
         pub = n.advertise<ras_arduino_msgs::PWM>("/arduino/pwm", 1);
 
-        //P=3;
-        /*
-        pwmOut1=0;
-        pwmOut2=0;
-        actualAngVelRight=0;
-        actualAngVelLeft=0;
-        desiredAngVelLeft=0;
-        desiredAngVelRight=0;
-        */
     }
     
     // -------- CHECK WHICH MOTOR IS WHICH --------------------
@@ -107,20 +98,20 @@ public:
         //ROS_INFO("Actual wL: [%f]",actualAngVelLeft);
     }
 
-/*
+
     void twistCallback(const geometry_msgs::Twist::ConstPtr &twist_msg)
     {
         double twist_linVel_x=twist_msg->linear.x;
         double twist_angVel_x=twist_msg->angular.z;
-        double base=0.23;
-        double r=0.0352;
+        double base=0.21;
+        double r=0.05;
         //ROS_INFO("I heard: [%f]", twist_msg->angular.x);
 
         desiredAngVelRight = (twist_linVel_x+(base/2)*twist_angVel_x)/r;
         desiredAngVelLeft = (twist_linVel_x-(base/2)*twist_angVel_x)/r;
         //ROS_INFO("wRight: [%f]\n wLeft: [%f]",desiredAngVelRight,desiredAngVelLeft);
     }
-    */
+    
 
     // ----- CHECK PWM VALUES TO BE TO CORRECT MOTOR ---------------
 
@@ -194,7 +185,7 @@ int main(int argc, char **argv)
     // ---------------------------------------------------
 
     // This calls a linear velocity and angular velocity from launch file
-    controller.GetVelocities();
+    //controller.GetVelocities();
 
     ros::Rate loop_rate(10);
 
