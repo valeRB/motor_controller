@@ -154,7 +154,7 @@ public:
 
         int pwmOut1 = (int)pwm1;
         int pwmOut2 = (int)pwm2;
-        ROS_INFO("KPR: [%f]",KPR);
+        //ROS_INFO("KPR: [%f]",KPR);
         //ROS_INFO("PWM2:[%d]",pwmOut2);
 
         pwm_msg.PWM1 = pwmOut1;
