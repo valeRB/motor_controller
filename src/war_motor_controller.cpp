@@ -66,30 +66,21 @@ public:
         n.getParam("linVel",twist_linVel_x);
         n.getParam("angVel",twist_angVel_x);
         double base=0.21;
-        double r=0.1;
+        double r=0.05;
         //ROS_INFO("I heard: [%f]", twist_msg->angular.x);
 
         desiredAngVelRight = (twist_linVel_x+(base/2)*twist_angVel_x)/r;
         desiredAngVelLeft = (twist_linVel_x-(base/2)*twist_angVel_x)/r;
-    }
+    } 
     
 
     void init()
     {
         motor_cotroller_ = new MotorController();
         encoder_subscriber = n.subscribe("/arduino/encoders", 1, &MotorController::encoderCallback,this);
-        //twist_subscriber = n.subscribe("/motor_controller/twist",1, &MotorController::twistCallback,this);
+        twist_subscriber = n.subscribe("/motor_controller/twist",1, &MotorController::twistCallback,this);
         pub = n.advertise<ras_arduino_msgs::PWM>("/arduino/pwm", 1);
 
-        //P=3;
-        /*
-        pwmOut1=0;
-        pwmOut2=0;
-        actualAngVelRight=0;
-        actualAngVelLeft=0;
-        desiredAngVelLeft=0;
-        desiredAngVelRight=0;
-        */
     }
     
     // -------- CHECK WHICH MOTOR IS WHICH --------------------
@@ -101,30 +92,29 @@ public:
         double delta_enc2=enc_msg->delta_encoder2;
         double sampleTime=0.1;
         //ROS_INFO("I heard: [%d]", enc_msg->encoder1);
-        actualAngVelRight=(delta_enc2*(M_PI/180))/sampleTime;
-        actualAngVelLeft=(delta_enc1*(M_PI/180))/sampleTime;
+        actualAngVelLeft=(delta_enc2*(M_PI/180))/sampleTime;
+        actualAngVelRight=(delta_enc1*(M_PI/180))/sampleTime;
         //ROS_INFO("Actual wR: [%f]",actualAngVelRight);
         //ROS_INFO("Actual wL: [%f]",actualAngVelLeft);
     }
 
-/*
+
     void twistCallback(const geometry_msgs::Twist::ConstPtr &twist_msg)
     {
         double twist_linVel_x=twist_msg->linear.x;
         double twist_angVel_x=twist_msg->angular.z;
-        double base=0.23;
-        double r=0.0352;
+        double base=0.21;
+        double r=0.05;
         //ROS_INFO("I heard: [%f]", twist_msg->angular.x);
 
         desiredAngVelRight = (twist_linVel_x+(base/2)*twist_angVel_x)/r;
         desiredAngVelLeft = (twist_linVel_x-(base/2)*twist_angVel_x)/r;
         //ROS_INFO("wRight: [%f]\n wLeft: [%f]",desiredAngVelRight,desiredAngVelLeft);
     }
-    */
+    
 
     // ----- CHECK PWM VALUES TO BE TO CORRECT MOTOR ---------------
-    // PWM1 - Right Wheel
-    // PWM2 - Left Wheel
+
     void controllerVelocities()
     {   
         // This controller uses the Ziegler-Nichols method
@@ -138,24 +128,28 @@ public:
                 
         // Controller for left wheel
         double errorLeft = (desiredAngVelLeft - actualAngVelLeft);
+        ROS_INFO("errorLeft: [%f]",errorLeft);
         ItermL = ItermL + KIL*errorLeft*dT;
         DtermL = (errorLeft - previousErrorLeft)/dT;
-        pwm1 = pwm1 + KPL*errorLeft + ItermL + KDL*DtermL;
-        if (pwm1 > 255)
-            pwm1 = 255;
+        pwm2 = pwm2 + KPL*errorLeft + ItermL + KDL*DtermL;
+        if (pwm2 > 150)
+            pwm2 = 150;
+        else if(pwm2 < -150)
+            pwm2 =-150;
 
-        // Controller for left wheel
+        // Controller for right wheel
         double errorRight = (desiredAngVelRight - actualAngVelRight);
+        ROS_INFO("errorRight: [%f]",errorRight);
         ItermR = ItermR + KIR*errorRight*dT;
         DtermR = (errorRight - previousErrorRight)/dT;   
-        pwm2 = pwm2 + KPR*errorRight + ItermR + KDR*DtermR;
-        if (pwm2 > 255)
-            pwm2 =255;
+        pwm1 = pwm1 + KPR*errorRight + ItermR + KDR*DtermR;
+        if (pwm1 > 150)
+            pwm1 = 150;
+        else if(pwm1 < -150)
+            pwm1 =-150;
 
         int pwmOut1 = (int)pwm1;
         int pwmOut2 = (int)pwm2;
-        //ROS_INFO("KPR: [%f]",KPR);
-        //ROS_INFO("PWM2:[%d]",pwmOut2);
 
         pwm_msg.PWM1 = pwmOut1;
         pwm_msg.PWM2 = pwmOut2;
@@ -190,7 +184,7 @@ int main(int argc, char **argv)
     // ---------------------------------------------------
 
     // This calls a linear velocity and angular velocity from launch file
-    controller.GetVelocities();
+    //controller.GetVelocities();
 
     ros::Rate loop_rate(10);
 
