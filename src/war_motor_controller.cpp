@@ -128,7 +128,7 @@ public:
                 
         // Controller for left wheel
         double errorLeft = (desiredAngVelLeft - actualAngVelLeft);
-        ROS_INFO("errorLeft: [%f]",errorLeft);
+//        ROS_INFO("errorLeft: [%f]",errorLeft);
         ItermL = ItermL + KIL*errorLeft*dT;
         DtermL = (errorLeft - previousErrorLeft)/dT;
         pwm2 = pwm2 + KPL*errorLeft + ItermL + KDL*DtermL;
@@ -139,7 +139,7 @@ public:
 
         // Controller for right wheel
         double errorRight = (desiredAngVelRight - actualAngVelRight);
-        ROS_INFO("errorRight: [%f]",errorRight);
+//        ROS_INFO("errorRight: [%f]",errorRight);
         ItermR = ItermR + KIR*errorRight*dT;
         DtermR = (errorRight - previousErrorRight)/dT;   
         pwm1 = pwm1 + KPR*errorRight + ItermR + KDR*DtermR;
