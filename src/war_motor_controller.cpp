@@ -138,10 +138,7 @@ public:
         ItermL = ItermL + KIL*errorLeft*dT;
         DtermL = (errorLeft - previousErrorLeft)/dT;
         pwm2 = pwm2 + KPL*errorLeft + ItermL + KDL*DtermL;
-        if (pwm2 > 150)
-            pwm2 = 150;
-        else if(pwm2 < -150)
-            pwm2 =-150;
+
 
         // Controller for right wheel
         double errorRight = (desiredAngVelRight - actualAngVelRight);
@@ -149,11 +146,27 @@ public:
         ItermR = ItermR + KIR*errorRight*dT;
         DtermR = (errorRight - previousErrorRight)/dT;   
         pwm1 = pwm1 + KPR*errorRight + ItermR + KDR*DtermR;
+		
+		if(pwm2>pwm1 && pwm2>150){
+			double lowering=pwm2/150;
+			pwm2= pwm2/lowering;
+			pwm1= pwm1 / lowering;
+		}		
+		if(pwm1>pwm2 && pwm1>150){
+			double lowering=pwm1/150;
+			pwm2= pwm2/lowering;
+			pwm1= pwm1 / lowering;
+		}
+		/*
+		if (pwm2 > 150)
+            pwm2 = 150;
+        else if(pwm2 < -150)
+            pwm2 =-150;
         if (pwm1 > 150)
             pwm1 = 150;
         else if(pwm1 < -150)
             pwm1 =-150;
-
+	*/
         int pwmOut1 = (int)pwm1;
         int pwmOut2 = (int)pwm2; 
 /*
