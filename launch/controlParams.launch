@@ -9,11 +9,11 @@
   <!-- Run Motor Controller  -->
   <node pkg="motor_controller" type="motor_controller" name="PID_controller" output="screen" >
    	<!-- KP, KI, KD individually  -->
-    <param name="KPR" value="0.9"/>
+    <param name="KPR" value="0.9"/> <!--0.3 -->
     <param name="KPL" value="0.9"/>
-    <param name="KIR" value="0.3"/>
+    <param name="KIR" value="0.3"/> <!--0.05 -->
     <param name="KIL" value="0.3"/>
-    <param name="KDR" value="0.8"/>
+    <param name="KDR" value="0.8"/> <!--0.005 -->
     <param name="KDL" value="0.8"/>
    	<!-- Ziegler-Nichols parameters  -->
     <param name="KUR" value="5"/>

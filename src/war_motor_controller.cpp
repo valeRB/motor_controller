@@ -3,6 +3,9 @@
 #include "ras_arduino_msgs/Encoders.h"
 #include "ras_arduino_msgs/PWM.h"
 #include "math.h"
+#include <wall_follower/ResetPWM.h>
+
+#define RATE 20.0
 
 class MotorController
 {
@@ -12,6 +15,7 @@ public:
     ros::Subscriber encoder_subscriber;
     ros::Subscriber twist_subscriber;
     ros::Publisher pub;
+    ros::ServiceServer reset;
     double pwmOut1,pwmOut2;
     double actualAngVelRight,actualAngVelLeft,desiredAngVelLeft,desiredAngVelRight;
     double pwm1, pwm2;
@@ -80,6 +84,7 @@ public:
         encoder_subscriber = n.subscribe("/arduino/encoders", 1, &MotorController::encoderCallback,this);
         twist_subscriber = n.subscribe("/motor_controller/twist",1, &MotorController::twistCallback,this);
         pub = n.advertise<ras_arduino_msgs::PWM>("/arduino/pwm", 1);
+        reset = n.advertiseService("/reset_pwm", &MotorController::resetPWM, this);
 
     }
     
@@ -90,8 +95,9 @@ public:
         double enc2=enc_msg->encoder2;
         double delta_enc1=enc_msg->delta_encoder1;
         double delta_enc2=enc_msg->delta_encoder2;
-        double sampleTime=0.1;
+        double sampleTime=1/RATE;
         //ROS_INFO("I heard: [%d]", enc_msg->encoder1);
+        //ROS_INFO("I heard: [%d]", enc_msg->encoder2);
         actualAngVelLeft=(delta_enc2*(M_PI/180))/sampleTime;
         actualAngVelRight=(delta_enc1*(M_PI/180))/sampleTime;
         //ROS_INFO("Actual wR: [%f]",actualAngVelRight);
@@ -111,16 +117,16 @@ public:
         desiredAngVelLeft = (twist_linVel_x-(base/2)*twist_angVel_x)/r;
         //ROS_INFO("wRight: [%f]\n wLeft: [%f]",desiredAngVelRight,desiredAngVelLeft);
     }
-    
+
 
     // ----- CHECK PWM VALUES TO BE TO CORRECT MOTOR ---------------
 
     void controllerVelocities()
-    {   
+    {
         // This controller uses the Ziegler-Nichols method
         // to tune the KP,KI,KD
 
-        double dT=0.1;
+        double dT=1/RATE;
         
         ras_arduino_msgs::PWM pwm_msg;
         //ROS_INFO("desiredAngVelRight: [%f]",desiredAngVelRight);
@@ -149,9 +155,17 @@ public:
             pwm1 =-150;
 
         int pwmOut1 = (int)pwm1;
-        int pwmOut2 = (int)pwm2;
+        int pwmOut2 = (int)pwm2; 
+/*
+	if(std::abs(desiredAngVelRight) > 0.01) {
+		pwmOut1 += desiredAngVelRight > 0 ? 45 : -45;
+	}
 
-        pwm_msg.PWM1 = pwmOut1;
+	if(std::abs(desiredAngVelLeft) > 0.01) {
+		pwmOut2 += desiredAngVelLeft > 0 ? 45 : -45;
+	}
+*/
+        pwm_msg.PWM1 = -pwmOut1;
         pwm_msg.PWM2 = pwmOut2;
         
 
@@ -161,6 +175,28 @@ public:
       
         previousErrorLeft = errorLeft;
         previousErrorRight = errorRight;
+    }
+
+    bool resetPWM(wall_follower::ResetPWM::Request &req, wall_follower::ResetPWM::Response &res) {
+        if (req.reset == 1) {
+            pwm1 = 0;
+            pwm2 = 0;
+            previousErrorLeft = 0;
+            previousErrorRight = 0;
+            ItermL = 0;
+            ItermR = 0;
+            DtermL = 0;
+            DtermR = 0;
+        } else if (req.reset == 2) {
+	    /*previousErrorLeft = 0;
+            previousErrorRight = 0;
+            ItermL = 0;
+            ItermR = 0;
+            DtermL = 0;
+    	    DtermR = 0;*/
+	}
+
+        return true;
     }
 private:
     MotorController *motor_cotroller_;
@@ -186,7 +222,7 @@ int main(int argc, char **argv)
     // This calls a linear velocity and angular velocity from launch file
     //controller.GetVelocities();
 
-    ros::Rate loop_rate(10);
+    ros::Rate loop_rate(RATE);
 
     
       while (controller.n.ok())
@@ -195,7 +231,7 @@ int main(int argc, char **argv)
         controller.controllerVelocities();     
         loop_rate.sleep();
         
-      } 
+      }
 
     return 0;
 
