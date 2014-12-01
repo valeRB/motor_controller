@@ -3,7 +3,7 @@
 #include "ras_arduino_msgs/Encoders.h"
 #include "ras_arduino_msgs/PWM.h"
 #include "math.h"
-#include <wall_follower/ResetPWM.h>
+#include <robot_msgs/ResetPWM.h>
 
 #define RATE 20.0
 
@@ -190,7 +190,7 @@ public:
         previousErrorRight = errorRight;
     }
 
-    bool resetPWM(wall_follower::ResetPWM::Request &req, wall_follower::ResetPWM::Response &res) {
+    bool resetPWM(robot_msgs::ResetPWM::Request &req, robot_msgs::ResetPWM::Response &res) {
         if (req.reset == 1) {
             pwm1 = 0;
             pwm2 = 0;

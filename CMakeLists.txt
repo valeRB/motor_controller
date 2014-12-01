@@ -4,6 +4,7 @@ project(motor_controller)
 ## Find catkin and any catkin packages
 find_package(catkin REQUIRED COMPONENTS 
   roscpp 
+  robot_msgs
 #  genmsg
 )
 
@@ -12,7 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 ## Declare a catkin package
 catkin_package(
-# CATKIN_DEPENDS message_runtime
+ CATKIN_DEPENDS roscpp robot_msgs
 )
 
 ## Build talker and listener
