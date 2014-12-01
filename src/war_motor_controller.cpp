@@ -200,14 +200,7 @@ public:
             ItermR = 0;
             DtermL = 0;
             DtermR = 0;
-        } else if (req.reset == 2) {
-	    /*previousErrorLeft = 0;
-            previousErrorRight = 0;
-            ItermL = 0;
-            ItermR = 0;
-            DtermL = 0;
-    	    DtermR = 0;*/
-	}
+        }
 
         return true;
     }
